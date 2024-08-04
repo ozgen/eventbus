@@ -1,1 +1,1 @@
-module eventbus
+module github.com/ozgen/eventbus
