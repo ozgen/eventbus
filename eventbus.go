@@ -6,7 +6,7 @@ import (
 	"sync"
 )
 
-// Event defines the interface for all events.
+// Event defines the structure for all events.
 type Event struct {
 	Type    string
 	Payload interface{}
@@ -19,6 +19,7 @@ type Listener func(Event)
 type EventBus struct {
 	listeners map[string][]Listener
 	lock      sync.Mutex
+	wg        sync.WaitGroup
 	logger    *log.Logger
 }
 
@@ -35,7 +36,14 @@ func New() *EventBus {
 func (eb *EventBus) Subscribe(eventType string, listener Listener) {
 	eb.lock.Lock()
 	defer eb.lock.Unlock()
-	eb.listeners[eventType] = append(eb.listeners[eventType], listener)
+	wrappedListener := func(e Event) {
+		eb.wg.Add(1)
+		go func() {
+			defer eb.wg.Done()
+			listener(e)
+		}()
+	}
+	eb.listeners[eventType] = append(eb.listeners[eventType], wrappedListener)
 	eb.logger.Printf("Subscribed new listener to event type '%s'", eventType)
 }
 
@@ -48,7 +56,7 @@ func (eb *EventBus) Publish(event Event) {
 	if ok {
 		eb.logger.Printf("Publishing event of type '%s' to %d listeners", event.Type, len(listeners))
 		for _, listener := range listeners {
-			go listener(event)
+			listener(event) // Listener already in a goroutine via subscribe
 		}
 	} else {
 		eb.logger.Printf("No listeners for event type '%s'", event.Type)
@@ -57,5 +65,12 @@ func (eb *EventBus) Publish(event Event) {
 
 // SetLogger allows external configuration of the logger.
 func (eb *EventBus) SetLogger(logger *log.Logger) {
+	eb.lock.Lock()
+	defer eb.lock.Unlock()
 	eb.logger = logger
+}
+
+// Wait blocks until all events have been processed.
+func (eb *EventBus) Wait() {
+	eb.wg.Wait()
 }
