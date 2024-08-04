@@ -1,10 +1,4 @@
-Certainly! To update your README for the `EventBus` project, we should include the new `Wait()` method that ensures all events are processed before an application exits. This can be critical for understanding and using the library effectively, especially in applications that need to ensure all events are handled properly before termination or during a controlled shutdown.
 
-### Updated README.md for EventBus
-
-Here is an updated version of the `README.md`:
-
-```markdown
 # EventBus
 
 EventBus is a lightweight, efficient, and easy-to-use publish/subscribe event bus system implemented in Go. It allows components within an application to communicate with each other using events without knowing the details of who is handling these events.
