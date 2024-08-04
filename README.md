@@ -8,7 +8,7 @@ EventBus is a lightweight, efficient, and easy-to-use publish/subscribe event bu
 To use EventBus in your Go projects, simply install it using `go get`:
 
 ```bash
-go get github.com/ozgen/eventbus
+go get github.com/ozgen/eventbus@v0.1.0
 ```
 
 ## Usage
